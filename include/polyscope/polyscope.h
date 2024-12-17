@@ -10,6 +10,7 @@
 
 #include "imgui.h"
 
+#include "polyscope/api.h"
 #include "polyscope/context.h"
 #include "polyscope/group.h"
 #include "polyscope/internal.h"
@@ -70,36 +71,36 @@ bool windowRequestsClose();
 namespace state {
 
 // has polyscope::init() been called?
-extern bool& initialized;
+extern POLYSCOPE_API bool& initialized;
 
 // what backend was set on initialization
-extern std::string& backend;
+extern POLYSCOPE_API std::string& backend;
 
 // lists of all structures in Polyscope, by category
 // TODO unique pointer
-extern std::map<std::string, std::map<std::string, std::unique_ptr<Structure>>>& structures;
+extern POLYSCOPE_API std::map<std::string, std::map<std::string, std::unique_ptr<Structure>>>& structures;
 
 // lists of all groups in Polyscope
-extern std::map<std::string, std::unique_ptr<Group>>& groups;
+extern POLYSCOPE_API std::map<std::string, std::unique_ptr<Group>>& groups;
 
 // representative length scale for all registered structures
-extern float& lengthScale;
+extern POLYSCOPE_API float& lengthScale;
 
 // axis-aligned bounding box for all registered structures
-extern std::tuple<glm::vec3, glm::vec3>& boundingBox;
+extern POLYSCOPE_API std::tuple<glm::vec3, glm::vec3>& boundingBox;
 
 // list of all slice planes in the scene
-extern std::vector<std::unique_ptr<SlicePlane>>& slicePlanes;
+extern POLYSCOPE_API std::vector<std::unique_ptr<SlicePlane>>& slicePlanes;
 
 // list of all widgets in the scene (the memory is NOT owned here, they're just refs)
-extern std::vector<WeakHandle<Widget>>& widgets;
+extern POLYSCOPE_API std::vector<WeakHandle<Widget>>& widgets;
 
 // should we allow default trackball mouse camera interaction?
 // Needs more interactions on when to turn this on/off
-extern bool& doDefaultMouseInteraction;
+extern POLYSCOPE_API bool& doDefaultMouseInteraction;
 
 // a callback function used to render a "user" gui
-extern std::function<void()>& userCallback;
+extern POLYSCOPE_API std::function<void()>& userCallback;
 
 // representative center for all registered structures
 glm::vec3 center();
@@ -109,7 +110,7 @@ glm::vec3 center();
 // platform-defined order we get if they are just static globals.
 // One day we may refactor Polyscope to explicitly track contexts and allow the use of multiple contexts. For now there
 // is always exactly one global context object.
-extern Context globalContext;
+extern POLYSCOPE_API Context globalContext;
 
 } // namespace state
 

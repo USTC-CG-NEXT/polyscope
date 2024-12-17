@@ -17,6 +17,8 @@
 
 #include <glm/glm.hpp>
 
+#include "polyscope/api.h"
+
 
 namespace polyscope {
 
@@ -137,8 +139,8 @@ std::vector<T> gather(const std::vector<T>& input, const std::vector<uint32_t>& 
 
 
 // === Random number generation
-extern std::random_device util_random_device;
-extern std::mt19937 util_mersenne_twister;
+extern POLYSCOPE_API std::random_device util_random_device;
+extern POLYSCOPE_API std::mt19937 util_mersenne_twister;
 
 inline double randomUnit() {
   std::uniform_real_distribution<double> dist(0., 1.);

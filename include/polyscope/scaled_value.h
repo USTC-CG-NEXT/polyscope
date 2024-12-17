@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "polyscope/api.h"
+
 namespace polyscope {
 
 // Manages a value which is _either_ scaled by `state::lengthScale` (the default), or an absolute value which is not
@@ -12,7 +14,7 @@ namespace polyscope {
 
 // forward declare
 namespace state {
-extern float& lengthScale;
+extern POLYSCOPE_API float& lengthScale;
 }
 
 template <typename T>

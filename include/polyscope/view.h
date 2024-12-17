@@ -6,6 +6,7 @@
 #include <string>
 #include <tuple>
 
+#include "polyscope/api.h"
 #include "polyscope/camera_parameters.h"
 #include "polyscope/types.h"
 // #include "polyscope/gl/gl_utils.h"
@@ -35,43 +36,43 @@ using polyscope::UpDir;
 
 // NOTE: users should use setters to set these if they exist, otherwise updates
 // may not be applied immediately.
-extern int& bufferWidth;
-extern int& bufferHeight;
-extern int& windowWidth;
-extern int& windowHeight;
-extern int& initWindowPosX;
-extern int& initWindowPosY;
-extern bool& windowResizable;
-extern NavigateStyle& style;
-extern UpDir& upDir;
-extern FrontDir& frontDir;
-extern double& moveScale;
-extern double& nearClipRatio;
-extern double& farClipRatio;
-extern std::array<float, 4>& bgColor;
+extern POLYSCOPE_API int& bufferWidth;
+extern POLYSCOPE_API int& bufferHeight;
+extern POLYSCOPE_API int& windowWidth;
+extern POLYSCOPE_API int& windowHeight;
+extern POLYSCOPE_API int& initWindowPosX;
+extern POLYSCOPE_API int& initWindowPosY;
+extern POLYSCOPE_API bool& windowResizable;
+extern POLYSCOPE_API NavigateStyle& style;
+extern POLYSCOPE_API UpDir& upDir;
+extern POLYSCOPE_API FrontDir& frontDir;
+extern POLYSCOPE_API double& moveScale;
+extern POLYSCOPE_API double& nearClipRatio;
+extern POLYSCOPE_API double& farClipRatio;
+extern POLYSCOPE_API std::array<float, 4>& bgColor;
 
 // Current view camera parameters
 // TODO deprecate these one day, and just use a CameraParameters member instead. But this would break existing code, so
 // for now we leave these as-is and wrap inputs/outputs to a CameraParameters
-extern glm::mat4x4& viewMat;
-extern double& fov; // in the y direction
-extern ProjectionMode& projectionMode;
+extern POLYSCOPE_API glm::mat4x4& viewMat;
+extern POLYSCOPE_API double& fov; // in the y direction
+extern POLYSCOPE_API ProjectionMode& projectionMode;
 
 // "Flying" view
-extern bool& midflight;
-extern float& flightStartTime;
-extern float& flightEndTime;
-extern glm::dualquat& flightTargetViewR;
-extern glm::dualquat& flightInitialViewR;
-extern glm::vec3& flightTargetViewT;
-extern glm::vec3& flightInitialViewT;
-extern float& flightTargetFov;
-extern float& flightInitialFov;
+extern POLYSCOPE_API bool& midflight;
+extern POLYSCOPE_API float& flightStartTime;
+extern POLYSCOPE_API float& flightEndTime;
+extern POLYSCOPE_API glm::dualquat& flightTargetViewR;
+extern POLYSCOPE_API glm::dualquat& flightInitialViewR;
+extern POLYSCOPE_API glm::vec3& flightTargetViewT;
+extern POLYSCOPE_API glm::vec3& flightInitialViewT;
+extern POLYSCOPE_API float& flightTargetFov;
+extern POLYSCOPE_API float& flightInitialFov;
 
 // Default values
-extern const double defaultNearClipRatio;
-extern const double defaultFarClipRatio;
-extern const double defaultFov;
+extern POLYSCOPE_API const double defaultNearClipRatio;
+extern POLYSCOPE_API const double defaultFarClipRatio;
+extern POLYSCOPE_API const double defaultFov;
 
 // === View methods
 

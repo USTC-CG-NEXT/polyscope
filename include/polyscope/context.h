@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "polyscope/api.h"
 #include <polyscope/types.h>
 #include <polyscope/weak_handle.h>
 
@@ -29,9 +30,9 @@ class SlicePlane;
 class Widget;
 class FloatingQuantityStructure;
 namespace view {
-extern const double defaultNearClipRatio;
-extern const double defaultFarClipRatio;
-extern const double defaultFov;
+extern POLYSCOPE_API const double defaultNearClipRatio;
+extern POLYSCOPE_API const double defaultFarClipRatio;
+extern POLYSCOPE_API const double defaultFov;
 } // namespace view
 
 // A context object wrapping all global state used by Polyscope.

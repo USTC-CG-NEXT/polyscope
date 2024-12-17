@@ -347,7 +347,9 @@ SET(HEADERS
 )
 
 # Create a single library for the project
-add_library(polyscope STATIC ${SRCS} ${BACKEND_SRCS} ${HEADERS} ${BACKEND_HEADERS})
+add_library(polyscope SHARED ${SRCS} ${BACKEND_SRCS} ${HEADERS} ${BACKEND_HEADERS})
+set_target_properties(polyscope PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+target_compile_definitions(polyscope PRIVATE POLYSCOPE_EXPORTS)
 
 # Mark the library target and its headers as installable
 install(TARGETS polyscope)
