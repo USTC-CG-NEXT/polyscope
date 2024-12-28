@@ -16,6 +16,7 @@
 #include "polyscope/internal.h"
 #include "polyscope/messages.h"
 #include "polyscope/options.h"
+#include "polyscope/polyscope.h"
 #include "polyscope/screenshot.h"
 #include "polyscope/slice_plane.h"
 #include "polyscope/structure.h"
@@ -178,6 +179,10 @@ void buildStructureGui();
 void buildPickGui();
 void buildUserGuiAndInvokeCallback();
 
+// Written the functions above for USTC_CG
+void buildPolyscopeGuiCustom();
+void buildStructureGuiCustom();
+void buildPickGuiCustom();
 
 // === Utility
 

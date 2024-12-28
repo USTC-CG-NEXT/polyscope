@@ -793,6 +793,204 @@ void buildUserGuiAndInvokeCallback() {
   }
 }
 
+void buildPolyscopeGuiCustom() {
+
+  // Create window
+  // static bool showPolyscopeWindow = true;
+  // ImGui::SetNextWindowPos(ImVec2(imguiStackMargin, imguiStackMargin));
+  // ImGui::SetNextWindowSize(ImVec2(leftWindowsWidth, 0.));
+
+  // ImGui::Begin("Polyscope", &showPolyscopeWindow);
+
+  if (ImGui::Button("Reset View")) {
+    view::flyToHomeView();
+  }
+  ImGui::SameLine();
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(1.0f, 0.0f));
+  if (ImGui::Button("Screenshot")) {
+    screenshot(options::screenshotTransparency);
+  }
+  ImGui::SameLine();
+  if (ImGui::ArrowButton("##Option", ImGuiDir_Down)) {
+    ImGui::OpenPopup("ScreenshotOptionsPopup");
+  }
+  ImGui::PopStyleVar();
+  if (ImGui::BeginPopup("ScreenshotOptionsPopup")) {
+
+    ImGui::Checkbox("with transparency", &options::screenshotTransparency);
+
+    if (ImGui::BeginMenu("file format")) {
+      if (ImGui::MenuItem(".png", NULL, options::screenshotExtension == ".png")) options::screenshotExtension = ".png";
+      if (ImGui::MenuItem(".jpg", NULL, options::screenshotExtension == ".jpg")) options::screenshotExtension = ".jpg";
+      ImGui::EndMenu();
+    }
+
+    ImGui::EndPopup();
+  }
+
+
+  ImGui::SameLine();
+  if (ImGui::Button("Controls")) {
+    // do nothing, just want hover state
+  }
+  if (ImGui::IsItemHovered()) {
+
+    ImGui::SetNextWindowPos(ImVec2(2 * imguiStackMargin + leftWindowsWidth, imguiStackMargin));
+    ImGui::SetNextWindowSize(ImVec2(0., 0.));
+
+    // clang-format off
+		ImGui::Begin("Controls", NULL, ImGuiWindowFlags_NoTitleBar);
+		ImGui::TextUnformatted("View Navigation:");
+			ImGui::TextUnformatted("      Rotate: [left click drag]");
+			ImGui::TextUnformatted("   Translate: [shift] + [left click drag] OR [right click drag]");
+			ImGui::TextUnformatted("        Zoom: [scroll] OR [ctrl] + [shift] + [left click drag]");
+			ImGui::TextUnformatted("   Use [ctrl-c] and [ctrl-v] to save and restore camera poses");
+			ImGui::TextUnformatted("     via the clipboard.");
+		ImGui::TextUnformatted("\nMenu Navigation:");
+			ImGui::TextUnformatted("   Menu headers with a '>' can be clicked to collapse and expand.");
+			ImGui::TextUnformatted("   Use [ctrl] + [left click] to manually enter any numeric value");
+			ImGui::TextUnformatted("     via the keyboard.");
+			ImGui::TextUnformatted("   Press [space] to dismiss popup dialogs.");
+		ImGui::TextUnformatted("\nSelection:");
+			ImGui::TextUnformatted("   Select elements of a structure with [left click]. Data from");
+			ImGui::TextUnformatted("     that element will be shown on the right. Use [right click]");
+			ImGui::TextUnformatted("     to clear the selection.");
+		ImGui::End();
+    // clang-format on
+  }
+
+  // View options tree
+  view::buildViewGui();
+
+  // Appearance options tree
+  render::engine->buildEngineGui();
+
+  // Render options tree
+  ImGui::SetNextItemOpen(false, ImGuiCond_FirstUseEver);
+  if (ImGui::TreeNode("Render")) {
+
+    // fps
+    ImGui::Text("Rolling: %.1f ms/frame (%.1f fps)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+    ImGui::Text("Last: %.1f ms/frame (%.1f fps)", ImGui::GetIO().DeltaTime * 1000.f, 1.f / ImGui::GetIO().DeltaTime);
+
+    ImGui::PushItemWidth(40);
+    if (ImGui::InputInt("max fps", &options::maxFPS, 0)) {
+      if (options::maxFPS < 1 && options::maxFPS != -1) {
+        options::maxFPS = -1;
+      }
+    }
+
+    ImGui::PopItemWidth();
+    ImGui::SameLine();
+    ImGui::Checkbox("vsync", &options::enableVSync);
+
+    ImGui::TreePop();
+  }
+
+  // ImGui::SetNextItemOpen(false, ImGuiCond_FirstUseEver);
+  // if (ImGui::TreeNode("Debug")) {
+
+  //   if (ImGui::Button("Force refresh")) {
+  //     refresh();
+  //   }
+  //   ImGui::Checkbox("Show pick buffer", &options::debugDrawPickBuffer);
+  //   ImGui::Checkbox("Always redraw", &options::alwaysRedraw);
+
+  //   static bool showDebugTextures = false;
+  //   ImGui::Checkbox("Show debug textures", &showDebugTextures);
+  //   if (showDebugTextures) {
+  //     render::engine->showTextureInImGuiWindow("Scene", render::engine->sceneColor.get());
+  //     render::engine->showTextureInImGuiWindow("Scene Final", render::engine->sceneColorFinal.get());
+  //   }
+  //   ImGui::TreePop();
+  // }
+
+
+  // lastWindowHeightPolyscope = imguiStackMargin + ImGui::GetWindowHeight();
+  // leftWindowsWidth = ImGui::GetWindowWidth();
+
+  // ImGui::End();
+}
+
+void buildStructureGuiCustom() {
+  // Create window
+  // static bool showStructureWindow = true;
+
+  // ImGui::SetNextWindowPos(ImVec2(imguiStackMargin, lastWindowHeightPolyscope + 2 * imguiStackMargin));
+  // ImGui::SetNextWindowSize(
+  //     ImVec2(leftWindowsWidth, view::windowHeight - lastWindowHeightPolyscope - 3 * imguiStackMargin));
+  // ImGui::Begin("Structures", &showStructureWindow);
+
+  // only show groups if there are any
+  if (state::groups.size() > 0) {
+    if (ImGui::CollapsingHeader("Groups", ImGuiTreeNodeFlags_DefaultOpen)) {
+      for (auto& x : state::groups) {
+        if (x.second->isRootGroup()) {
+          x.second->buildUI();
+        }
+      }
+    }
+  }
+
+  // groups have an option to hide structures from this list; assemble a list of structures to skip
+  std::unordered_set<Structure*> structuresToSkip;
+  for (auto& x : state::groups) {
+    x.second->appendStructuresToSkip(structuresToSkip);
+  }
+
+
+  for (auto& catMapEntry : state::structures) {
+    std::string catName = catMapEntry.first;
+
+    std::map<std::string, std::unique_ptr<Structure>>& structureMap = catMapEntry.second;
+
+    ImGui::PushID(catName.c_str()); // ensure there are no conflicts with
+                                    // identically-named labels
+
+    // Build the structure's UI
+    ImGui::SetNextItemOpen(structureMap.size() > 0, ImGuiCond_FirstUseEver);
+    if (ImGui::CollapsingHeader((catName + " (" + std::to_string(structureMap.size()) + ")").c_str())) {
+      // Draw shared GUI elements for all instances of the structure
+      if (structureMap.size() > 0) {
+        structureMap.begin()->second->buildSharedStructureUI();
+      }
+
+      int32_t skipCount = 0;
+      for (auto& x : structureMap) {
+        ImGui::SetNextItemOpen(structureMap.size() <= 8,
+                               ImGuiCond_FirstUseEver); // closed by default if more than 8
+
+        if (structuresToSkip.find(x.second.get()) != structuresToSkip.end()) {
+          skipCount++;
+          continue;
+        }
+
+        x.second->buildUI();
+      }
+
+      if (skipCount > 0) {
+        ImGui::Text("  (skipped %d hidden structures)", skipCount);
+      }
+    }
+
+    ImGui::PopID();
+  }
+
+  // leftWindowsWidth = ImGui::GetWindowWidth();
+
+  // ImGui::End();
+}
+
+void buildPickGuiCustom() {
+  if (pick::haveSelection()) {
+    std::pair<Structure*, size_t> selection = pick::getSelection();
+
+    ImGui::TextUnformatted((selection.first->typeName() + ": " + selection.first->name).c_str());
+    ImGui::Separator();
+    selection.first->buildPickUI(selection.second);
+  }
+}
+
 void draw(bool withUI, bool withContextCallback) {
   processLazyProperties();
 
