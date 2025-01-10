@@ -37,6 +37,7 @@ public:
   void prepare();
   void draw() override;
   bool interact() override;
+  bool interactCustom(glm::vec2 windowPos); // rewritten for USTC_CG
 
 protected:
   enum class TransformHandle { None, Rotation, Translation, Scale };

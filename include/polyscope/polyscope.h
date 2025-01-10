@@ -153,6 +153,9 @@ void refresh();
 // End users generally should not call this function. Consider requestRedraw() or screenshot().
 void draw(bool withUI = true, bool withContextCallback = true);
 
+// Rewritten the function above for USTC_CG
+void drawCustom();
+
 // Request that the 3D scene be redrawn for the next frame. Should be called anytime something changes in the scene.
 void requestRedraw();
 
@@ -179,7 +182,7 @@ void buildStructureGui();
 void buildPickGui();
 void buildUserGuiAndInvokeCallback();
 
-// Written the functions above for USTC_CG
+// Rewritten the functions above for USTC_CG
 void buildPolyscopeGuiCustom();
 void buildStructureGuiCustom();
 void buildPickGuiCustom();

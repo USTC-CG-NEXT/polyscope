@@ -1067,6 +1067,37 @@ void draw(bool withUI, bool withContextCallback) {
   }
 }
 
+void drawCustom() {
+  processLazyProperties();
+
+  // Update buffer and context
+  render::engine->makeContextCurrent();
+  render::engine->bindDisplay();
+  render::engine->setBackgroundColor({0., 0., 0.});
+  render::engine->setBackgroundAlpha(0);
+  render::engine->clearDisplay();
+
+  processLazyProperties();
+
+  // Draw structures in the scene
+  if (redrawNextFrame || options::alwaysRedraw) {
+    renderScene();
+    redrawNextFrame = false;
+  }
+  renderSceneToScreen();
+
+  // Draw transformation gizmos
+  render::engine->bindDisplay();
+  for (WeakHandle<Widget> wHandle : state::widgets) {
+    if (wHandle.isValid()) {
+      Widget& w = wHandle.get();
+      w.draw();
+    }
+  }
+
+  render::engine->bindDisplay();
+}
+
 
 void mainLoopIteration() {
 

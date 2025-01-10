@@ -17,6 +17,9 @@ void resetScreenshotIndex();
 // the dimensions are view::bufferWidth and view::bufferHeight , with entries RGBA at 1 byte each.
 std::vector<unsigned char> screenshotToBuffer(bool transparentBG = true);
 
+// Rewritten the above function for UCTC_CG
+std::vector<unsigned char> screenshotToBufferCustom(bool transparentBG = true);
+
 namespace state {
 
 // The current screenshot index for automatically numbered screenshots

@@ -380,7 +380,231 @@ bool TransformationGizmo::interact() {
   }
 
   return currentlyDragging || draggingAtStart;
-} // namespace polyscope
+}
+
+bool TransformationGizmo::interactCustom(glm::vec2 windowPos) {
+  if (!enabled.get()) return false;
+
+  ImGuiIO& io = ImGui::GetIO();
+
+  // end a drag, if needed
+  bool draggingAtStart = currentlyDragging;
+  if (currentlyDragging && (!ImGui::IsMouseDown(0) || !ImGui::IsMousePosValid())) {
+    currentlyDragging = false;
+  }
+
+  // Get the mouse ray in world space
+  glm::vec3 raySource = view::getCameraWorldPosition();
+  //   glm::vec2 mouseCoords{io.MousePos.x, io.MousePos.y};
+  glm::vec2 mouseCoords{io.MousePos.x - windowPos.x, io.MousePos.y - windowPos.y};
+  glm::vec3 ray = view::screenCoordsToWorldRay(mouseCoords);
+
+  // Get data about the widget
+  // (there are much more efficient ways to do this)
+  glm::vec3 center(T * glm::vec4{0., 0., 0., 1.});
+  glm::vec3 nX(T * glm::vec4{1., 0., 0., 0.});
+  glm::vec3 nY(T * glm::vec4{0., 1., 0., 0.});
+  glm::vec3 nZ(T * glm::vec4{0., 0., 1., 0.});
+  std::array<glm::vec3, 3> axNormals{glm::normalize(nX), glm::normalize(nY), glm::normalize(nZ)};
+
+  float transScale = glm::length(glm::vec3(T[0]));
+  float gizmoSize = transScale * gizmoSizeRel * state::lengthScale;
+  float diskRad = gizmoSize; // size 1
+  float diskWidth = gizmoSize * diskWidthObj;
+
+  if (currentlyDragging) {
+
+    if (selectedType == TransformHandle::Rotation) {
+
+      // Cast against the axis we are currently rotating
+      glm::vec3 normal = axNormals[selectedDim];
+      float dist, tHit;
+      glm::vec3 nearestPoint;
+      std::tie(tHit, dist, nearestPoint) = circleTest(raySource, ray, center, normal, diskRad - diskWidth);
+
+      if (dist != std::numeric_limits<float>::infinity()) {
+        // if a collinear line (etc) causes an inf dist, just don't process
+
+        // Compute the new nearest normal to the drag
+        glm::vec3 nearestDir = glm::normalize(nearestPoint - center);
+        float arg = glm::dot(normal, glm::cross(dragPrevVec, nearestDir));
+        arg = glm::clamp(arg, -1.f, 1.f);
+        float angle = std::asin(arg); // could be fancier with atan, but that's fine
+
+        // Split, transform, and recombine
+        glm::vec4 trans(T[3]);
+        T[3] = glm::vec4{0., 0., 0., 1.};
+        // T.get() = glm::translate(glm::rotate(angle, normal) * glm::translate(T.get(), -trans), trans);
+        T = glm::rotate(angle, normal) * T;
+        T[3] = trans;
+        markUpdated();
+        polyscope::requestRedraw();
+
+        dragPrevVec = nearestDir; // store this dir for the next time around
+      }
+    } else if (selectedType == TransformHandle::Translation) {
+
+      // Cast against the axis we are currently translating
+
+      glm::vec3 normal = axNormals[selectedDim];
+      float dist, tHit;
+      glm::vec3 nearestPoint;
+      std::tie(tHit, dist, nearestPoint) =
+          lineTest(raySource, ray, center, normal, std::numeric_limits<float>::infinity());
+
+      if (dist != std::numeric_limits<float>::infinity()) {
+        // if a collinear line (etc) causes an inf dist, just don't process
+
+        // Split, transform, and recombine
+        glm::vec3 trans = nearestPoint - dragPrevVec;
+        T[3][0] += trans.x;
+        T[3][1] += trans.y;
+        T[3][2] += trans.z;
+        markUpdated();
+        polyscope::requestRedraw();
+
+        dragPrevVec = nearestPoint; // store this dir for the next time around
+      }
+
+    } else if (selectedType == TransformHandle::Scale) {
+
+      // Cast against the scale sphere
+
+      float dist, tHit;
+      glm::vec3 nearestPoint;
+      float worldSphereRad = sphereRad * gizmoSize;
+      std::tie(tHit, dist, nearestPoint) = sphereTest(raySource, ray, center, worldSphereRad, false);
+
+      if (dist != std::numeric_limits<float>::infinity()) {
+        // if a collinear line (etc) causes an inf dist, just don't process
+
+        float newWorldRad = glm::length(nearestPoint - center);
+        float scaleRatio = newWorldRad / worldSphereRad;
+
+        // Split, transform, and recombine
+        glm::vec4 trans(T[3]);
+        T[3] = glm::vec4{0., 0., 0., 1.};
+        T *= scaleRatio;
+        T[3] = trans;
+        markUpdated();
+        polyscope::requestRedraw();
+
+        dragPrevVec = nearestPoint; // store this dir for the next time around
+      }
+    }
+  } else /* !currentlyDragging */ {
+
+    // == Find the part of the widget that we are closest to
+
+    float firstHit = std::numeric_limits<float>::infinity();
+    float hitDist = std::numeric_limits<float>::infinity();
+    int hitDim = -1;
+    TransformHandle hitType = TransformHandle::None;
+    glm::vec3 hitNearest(0., 0., 0.);
+
+    // Test the three rotation directions
+    for (int dim = 0; dim < 3; dim++) {
+
+      glm::vec3 normal = axNormals[dim];
+
+      float dist, tHit;
+      glm::vec3 nearestPoint;
+      std::tie(tHit, dist, nearestPoint) = circleTest(raySource, ray, center, normal, diskRad - diskWidth);
+
+      if (dist < diskWidth && tHit < firstHit) {
+        firstHit = tHit;
+        hitDist = dist;
+        hitDim = dim;
+        hitType = TransformHandle::Rotation;
+        hitNearest = nearestPoint;
+      }
+    }
+
+    // Test the three translation directions
+    for (int dim = 0; dim < 3; dim++) {
+
+      glm::vec3 normal = axNormals[dim];
+
+      float dist, tHit;
+      glm::vec3 nearestPoint;
+      std::tie(tHit, dist, nearestPoint) = lineTest(raySource, ray, center, normal, vecLength * gizmoSize);
+      tHit -= diskWidth; // pull the hit outward, hackily simulates cylinder radius
+
+      if (dist < diskWidth && tHit < firstHit) {
+        firstHit = tHit;
+        hitDist = dist;
+        hitDim = dim;
+        hitType = TransformHandle::Translation;
+        hitNearest = nearestPoint;
+      }
+    }
+
+    { // Test the scaling sphere
+
+      float dist, tHit;
+      glm::vec3 nearestPoint;
+      std::tie(tHit, dist, nearestPoint) = sphereTest(raySource, ray, center, sphereRad * gizmoSize);
+
+      if (dist == 0. && tHit < firstHit) {
+        firstHit = tHit;
+        hitDist = dist;
+        hitDim = 0;
+        hitType = TransformHandle::Scale;
+        hitNearest = nearestPoint;
+      }
+    }
+
+    // = Process the result
+
+    // clear selection before proceeding
+    selectedType = TransformHandle::None;
+    selectedDim = -1;
+
+    if (hitType == TransformHandle::Rotation && hitDist < diskWidth) {
+      // rotation is hovered
+
+      // set new selection
+      selectedType = TransformHandle::Rotation;
+      selectedDim = hitDim;
+
+      // if the mouse is clicked, start a drag
+      if (ImGui::IsMouseClicked(0)) {
+        currentlyDragging = true;
+
+        glm::vec3 nearestDir = glm::normalize(hitNearest - center);
+        dragPrevVec = nearestDir;
+      }
+    } else if (hitType == TransformHandle::Translation && hitDist < diskWidth) {
+      // translation is hovered
+
+      // set new selection
+      selectedType = TransformHandle::Translation;
+      selectedDim = hitDim;
+
+      // if the mouse is clicked, start a drag
+      if (ImGui::IsMouseClicked(0)) {
+        currentlyDragging = true;
+
+        dragPrevVec = hitNearest;
+      }
+    } else if (hitType == TransformHandle::Scale) {
+      // scaling is hovered
+
+      // set new selection
+      selectedType = TransformHandle::Scale;
+      selectedDim = -1;
+
+      // if the mouse is clicked, start a drag
+      if (ImGui::IsMouseClicked(0)) {
+        currentlyDragging = true;
+
+        dragPrevVec = hitNearest;
+      }
+    }
+  }
+
+  return currentlyDragging || draggingAtStart;
+}
 
 std::tuple<float, float, glm::vec3> TransformationGizmo::circleTest(glm::vec3 raySource, glm::vec3 rayDir,
                                                                     glm::vec3 center, glm::vec3 normal, float radius) {
