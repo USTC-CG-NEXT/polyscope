@@ -347,9 +347,12 @@ SET(HEADERS
 )
 
 # Create a single library for the project
-add_library(polyscope SHARED ${SRCS} ${BACKEND_SRCS} ${HEADERS} ${BACKEND_HEADERS})
-set_target_properties(polyscope PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-target_compile_definitions(polyscope PRIVATE POLYSCOPE_EXPORTS)
+add_library(polyscope ${SRCS} ${BACKEND_SRCS} ${HEADERS} ${BACKEND_HEADERS})
+
+if(BUILD_SHARED_LIBS)
+  set_target_properties(polyscope PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
+  target_compile_definitions(polyscope PRIVATE POLYSCOPE_SHARED_LIB POLYSCOPE_EXPORTS)
+endif()
 
 # Mark the library target and its headers as installable
 install(TARGETS polyscope)
