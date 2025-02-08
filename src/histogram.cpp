@@ -192,19 +192,19 @@ void Histogram::buildUI(float width) {
   ImVec2 imageLowerLeft(ImGui::GetCursorScreenPos().x, ImGui::GetCursorScreenPos().y);
 
   // Draw a cursor popup on mouseover
-  if (ImGui::IsItemHovered()) {
-    // Get mouse x coodinate within image
-    float mouseX = ImGui::GetMousePos().x - ImGui::GetCursorScreenPos().x - ImGui::GetScrollX();
-    double mouseT = mouseX / w;
-    double val = dataRange.first + mouseT * (dataRange.second - dataRange.first);
+  // if (ImGui::IsItemHovered()) {
+  //   // Get mouse x coodinate within image
+  //   float mouseX = ImGui::GetMousePos().x - ImGui::GetCursorScreenPos().x - ImGui::GetScrollX();
+  //   double mouseT = mouseX / w;
+  //   double val = dataRange.first + mouseT * (dataRange.second - dataRange.first);
 
-    ImGui::SetTooltip("%g", val);
+  //   ImGui::SetTooltip("%g", val);
 
-    // Draw line
-    ImVec2 lineStart(imageLowerLeft.x + mouseX, imageLowerLeft.y - h - 3);
-    ImVec2 lineEnd(imageLowerLeft.x + mouseX, imageLowerLeft.y - 4);
-    ImGui::GetWindowDrawList()->AddLine(lineStart, lineEnd, annoColor);
-  }
+  //   // Draw line
+  //   ImVec2 lineStart(imageLowerLeft.x + mouseX, imageLowerLeft.y - h - 3);
+  //   ImVec2 lineEnd(imageLowerLeft.x + mouseX, imageLowerLeft.y - 4);
+  //   ImGui::GetWindowDrawList()->AddLine(lineStart, lineEnd, annoColor);
+  // }
 
 
   /* This is pretty neat, but ultimately I decided I don't like the look of it. It has
