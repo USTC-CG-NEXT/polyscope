@@ -351,7 +351,8 @@ add_library(polyscope ${SRCS} ${BACKEND_SRCS} ${HEADERS} ${BACKEND_HEADERS})
 
 if(BUILD_SHARED_LIBS)
   set_target_properties(polyscope PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
-  target_compile_definitions(polyscope PRIVATE POLYSCOPE_SHARED_LIB POLYSCOPE_EXPORTS)
+  target_compile_definitions(polyscope PUBLIC POLYSCOPE_SHARED_LIB)
+  target_compile_definitions(polyscope PRIVATE POLYSCOPE_EXPORTS)
 endif()
 
 # Mark the library target and its headers as installable

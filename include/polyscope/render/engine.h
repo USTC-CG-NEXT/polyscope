@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "polyscope/api.h"
 #include "polyscope/render/color_maps.h"
 #include "polyscope/render/ground_plane.h"
 #include "polyscope/render/materials.h"
@@ -207,7 +208,7 @@ class RenderBuffer {
 public:
   // abstract class: use the factory methods from the Engine class
   RenderBuffer(RenderBufferType type_, unsigned int sizeX_, unsigned int sizeY_);
-  virtual ~RenderBuffer(){};
+  virtual ~RenderBuffer() {};
 
   virtual void resize(unsigned int newX, unsigned int newY);
 
@@ -228,7 +229,7 @@ class FrameBuffer {
 public:
   // abstract class: use the factory methods from the Engine class
   FrameBuffer();
-  virtual ~FrameBuffer(){};
+  virtual ~FrameBuffer() {};
 
   virtual void bind() = 0;
   // Bind to this framebuffer so subsequent draw calls will go to it
@@ -347,7 +348,7 @@ class ShaderProgram {
 
 public:
   ShaderProgram(DrawMode dm);
-  virtual ~ShaderProgram(){};
+  virtual ~ShaderProgram() {};
 
 
   // === Store data
@@ -670,10 +671,10 @@ protected:
 
 // The global render engine
 // Gets initialized by initializeRenderEngine() in polyscope::init();
-extern Engine* engine;
+extern POLYSCOPE_API Engine* engine;
 
 // The backend type of the engine, as initialized above
-extern std::string engineBackendName;
+extern POLYSCOPE_API std::string engineBackendName;
 
 // Call once to initialize
 // (see render/initialize_backend.cpp)
