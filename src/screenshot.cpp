@@ -4,6 +4,7 @@
 
 #include "polyscope/polyscope.h"
 
+#include "polyscope/render/engine.h"
 #include "stb_image_write.h"
 
 #include <algorithm>
@@ -174,6 +175,7 @@ std::vector<unsigned char> screenshotToBufferCustom(bool transparentBG) {
   requestRedraw();
 
   drawCustom();
+  render::engine->swapDisplayBuffers();
 
   if (requestedAlready) {
     requestRedraw();
