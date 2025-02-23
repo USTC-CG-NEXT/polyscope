@@ -21,7 +21,14 @@ Structure::Structure(std::string name_, std::string subtypeName)
   validateName(name);
 }
 
-Structure::~Structure(){};
+Structure::~Structure() {};
+
+Structure* Structure::setTransformationGizmoEnabled(bool newVal) {
+  if (newVal == transformGizmo.enabled.get()) return this;
+  transformGizmo.enabled = newVal;
+  transformGizmo.enabled.manuallyChanged();
+  return this;
+}
 
 Structure* Structure::setEnabled(bool newEnabled) {
   if (newEnabled == isEnabled()) return this;

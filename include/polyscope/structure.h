@@ -76,6 +76,7 @@ public:
   void centerBoundingBox();
   void rescaleToUnit();
   void resetTransform();
+  virtual Structure* setTransformationGizmoEnabled(bool newVal);
   void setTransform(glm::mat4x4 transform);
   void setPosition(glm::vec3 vec); // set the transform translation to be vec
   void translate(glm::vec3 vec);   // *adds* vec to the position
