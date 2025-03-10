@@ -1073,8 +1073,10 @@ void drawCustom() {
   // Update buffer and context
   render::engine->makeContextCurrent();
   render::engine->bindDisplay();
-  render::engine->setBackgroundColor({0., 0., 0.});
-  render::engine->setBackgroundAlpha(0);
+  //   render::engine->setBackgroundColor({0., 0., 0.});
+  //   render::engine->setBackgroundAlpha(0);
+  render::engine->setBackgroundColor(glm::vec3(view::bgColor[0], view::bgColor[1], view::bgColor[2]));
+  render::engine->setBackgroundAlpha(view::bgColor[3]);
   render::engine->clearDisplay();
 
   processLazyProperties();
